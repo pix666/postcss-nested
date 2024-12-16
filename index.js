@@ -51,8 +51,8 @@ function interpolateAmpInSelector(nodes, parent) {
 /**
  * Combines parent and child selectors, in a SCSS-like way
  */
-function mergeSelectors(parent, child) {
-  let merged = []
+function mergeSelectors(parent, child, mergeSels = true) {
+  let merged = new Set()
   for (let sel of parent.selectors) {
     let parentNode = parse(sel, parent)
 
@@ -62,14 +62,14 @@ function mergeSelectors(parent, child) {
       }
       let node = parse(selector, child)
       let replaced = interpolateAmpInSelector(node, parentNode)
-      if (!replaced) {
+      if (!replaced && mergeSels) {
         node.prepend(parser.combinator({ value: ' ' }))
         node.prepend(parentNode.clone({}))
       }
-      merged.push(node.toString())
+      merged.add(node.toString())
     }
   }
-  return merged
+  return Array.from(merged)
 }
 
 /**
@@ -104,9 +104,7 @@ function createFnAtruleChilds(bubble) {
     let children = []
     atrule.each(child => {
       if (child.type === 'rule' && bubbling) {
-        if (mergeSels) {
-          child.selectors = mergeSelectors(rule, child)
-        }
+        child.selectors = mergeSelectors(rule, child, mergeSels)
       } else if (child.type === 'atrule' && child.nodes) {
         if (bubble[child.name]) {
           atruleChilds(rule, child, mergeSels)

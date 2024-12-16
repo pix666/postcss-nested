@@ -126,6 +126,39 @@ test('nested at-root with nested media', () => {
   )
 })
 
+test('at-root with ampersand', () => {
+  run('a { & {} @at-root { b & {} } }', 'a {} b a {}')
+})
+
+test('at-root with ampersand 2', () => {
+  run('a { & {} @at-root { & b {} } }', 'a {} a b {}')
+})
+
+test('nested at-root with ampersand', () => {
+  run(
+    `a {
+      & {}
+      @at-root {
+        b & {
+          @at-root {
+            c & {
+              & {}
+            }
+            @media y {
+              d {}
+            }
+          }
+        }
+      }
+    }`,
+    `a {}
+    c b a {}
+    @media y {
+      d {}
+    }`
+  )
+})
+
 test('tolerates immediately nested at-root', () => {
   run(
     `a {
