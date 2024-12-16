@@ -1,7 +1,20 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 6.0.1
+## 7.0.2
+* Fixed nested selector regression (by @Ulyanov-programmer).
+
+## 7.0.1
+* Fixed RegExp issue with nested comments (by @Ulyanov-programmer).
+
+## 7.0.0
+* More complex logic of when to move comments (by @Ulyanov-programmer).
+* Removed Node.js 16, 14, and 12 support.
+
+## 6.2.0
+* Added `@starting-style` to bubbling at-rules.
+
+## 6.1.0
 * Added `@container` to bubbling at-rules.
 
 ## 6.0

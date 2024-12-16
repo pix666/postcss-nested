@@ -1,5 +1,5 @@
-let { equal, throws } = require('uvu/assert')
 let { test } = require('uvu')
+let { equal, throws } = require('uvu/assert')
 let postcss = require('postcss').default
 
 let plugin = require('./')
@@ -604,16 +604,75 @@ test('clears empty selector after comma', () => {
   run('a, b { .one, .two, {} }', 'a .one, a .two, b .one, b .two {}')
 })
 
-test('moves comment with rule', () => {
-  run('a { /*B*/ /*B2*/ b {} }', '/*B*/ /*B2*/ a b {}')
+test("Save the parent's comment", () => {
+  run('a { /*i*/ b {} }', 'a { /*i*/ } a b {}')
 })
 
-test('moves comment with at-rule', () => {
-  run('a { /*B*/ @media { one: 1 } }', '/*B*/ @media {a { one: 1 } }')
+test("Save the parent's comment", () => {
+  run(
+    `
+div {
+  /* Comment with ^ $ . | ? * + () */
+  &[data-roots-all^=1] * #id .class {}
+}`,
+    '/* Comment with ^ $ . | ? * + () */ div[data-roots-all^=1] * #id .class {}')
+})
+
+test("Save several rules with attached comments", () => {
+  run(
+    `
+a { 
+  /*i*/
+
+  /*i2*/
+  b {} 
+  /*i3*/
+  s {} 
+}`,
+    `a { /*i*/ } /*i2*/ a b {} /*i3*/ a s {}`
+  )
+})
+
+test("Save the parent's comment with newline", () => {
+  run(
+    `a { 
+    /*i*/
+
+     b {} 
+     }`,
+    `a { /*i*/ } a b {}`
+  )
+})
+
+test('Save the comments for the parent and child', () => {
+  run(
+    `
+a { 
+  /*i*/ 
+  /*o*/
+  b {} 
+}`,
+
+    `a { /*i*/ } /*o*/ a b {}`
+  )
+})
+
+test('Save the comments for the parent and child with at-rule', () => {
+  run(
+    `a { /*i*/ 
+    /*o*/
+    @media { one: 1 } }`,
+
+    `a { /*i*/ } /*o*/ @media {a { one: 1 } }`
+  )
 })
 
 test('moves comment with declaration', () => {
-  run('a { @media { /*B*/ one: 1 } }', '@media {a { /*B*/ one: 1 } }')
+  run('a { @media { /*B*/ one: 1 } }', '@media { a { /*B*/ one: 1 } }')
+})
+
+test('moves comment with declaration without properties', () => {
+  run('a { @media { /*B*/ } }', '@media { a { /*B*/ } }')
 })
 
 test('saves order of rules', () => {
